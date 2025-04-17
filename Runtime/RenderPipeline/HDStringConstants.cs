@@ -457,6 +457,8 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _DepthPyramidMipLevelOffsets = Shader.PropertyToID("_DepthPyramidMipLevelOffsets");
         public static readonly int _DepthPyramidFirstMipLevelOffset = Shader.PropertyToID("_DepthPyramidFirstMipLevelOffset");
 
+        public static readonly int _SsrLightingTextureCache = Shader.PropertyToID("_SsrLightingTextureCache");
+
         // Still used by ray tracing.
         public static readonly int _SsrStencilBit = Shader.PropertyToID("_SsrStencilBit");
         public static readonly int _DeferredStencilBit = Shader.PropertyToID("_DeferredStencilBit");

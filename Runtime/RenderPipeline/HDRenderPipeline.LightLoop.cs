@@ -18,6 +18,8 @@ namespace UnityEngine.Rendering.HighDefinition
             public TextureHandle ssgiLightingBuffer;
             public TextureHandle contactShadowsBuffer;
             public TextureHandle screenspaceShadowBuffer;
+
+            public TextureHandle ReflectionCacheBuffer;
         }
 
         static LightingBuffers ReadLightingBuffers(in LightingBuffers buffers, RenderGraphBuilder builder)
@@ -30,6 +32,8 @@ namespace UnityEngine.Rendering.HighDefinition
             result.contactShadowsBuffer = builder.ReadTexture(buffers.contactShadowsBuffer);
             result.screenspaceShadowBuffer = builder.ReadTexture(buffers.screenspaceShadowBuffer);
 
+            result.ReflectionCacheBuffer = builder.ReadTexture(buffers.ReflectionCacheBuffer);
+
             return result;
         }
 
@@ -40,6 +44,8 @@ namespace UnityEngine.Rendering.HighDefinition
             cmd.SetGlobalTexture(HDShaderIDs._IndirectDiffuseTexture, buffers.ssgiLightingBuffer);
             cmd.SetGlobalTexture(HDShaderIDs._ContactShadowTexture, buffers.contactShadowsBuffer);
             cmd.SetGlobalTexture(HDShaderIDs._ScreenSpaceShadowsTexture, buffers.screenspaceShadowBuffer);
+
+            cmd.SetGlobalTexture(HDShaderIDs._SsrLightingTextureCache, buffers.ReflectionCacheBuffer);
         }
 
         static void BindGlobalThicknessBuffers(TextureHandle thicknessTexture, GraphicsBuffer thicknessReindexMap, CommandBuffer cmd)
@@ -55,6 +61,8 @@ namespace UnityEngine.Rendering.HighDefinition
             cmd.SetGlobalTexture(HDShaderIDs._IndirectDiffuseTexture, defaultResources.blackTextureXR);
             cmd.SetGlobalTexture(HDShaderIDs._ContactShadowTexture, defaultResources.blackUIntTextureXR);
             cmd.SetGlobalTexture(HDShaderIDs._ScreenSpaceShadowsTexture, defaultResources.blackTextureXR);
+
+            cmd.SetGlobalTexture(HDShaderIDs._SsrLightingTextureCache, defaultResources.blackTextureXR);
         }
 
         class BuildGPULightListPassData

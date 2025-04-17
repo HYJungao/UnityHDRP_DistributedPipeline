@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering.RenderGraphModule;
+using UnityEngine.Rendering.RenderGraphModule.Util;
 using UnityEngine.VFX;
 
 // Resove the ambiguity in the RendererList name (pick the in-engine version)
@@ -198,6 +199,30 @@ namespace UnityEngine.Rendering.HighDefinition
                     if (rtReflections)
                         lightingBuffers.ssrLightingBuffer = RenderSSR(m_RenderGraph, hdCamera, ref prepassOutput, clearCoatMask, rayCountTexture, historyValidationTexture, m_SkyManager.GetSkyReflection(hdCamera), transparent: false);
                     lightingBuffers.ssgiLightingBuffer = RenderScreenSpaceIndirectDiffuse(hdCamera, prepassOutput, rayCountTexture, historyValidationTexture, gpuLightListOutput.lightList);
+
+                    using (var builder = m_RenderGraph.AddRenderPass<PushFullScreenDebugPassData>("Copy Reflection", out var copyPass))
+                    {
+                        copyPass.mipIndex = -1;
+                        copyPass.xrTexture = true;
+                        copyPass.input = builder.ReadTexture(lightingBuffers.ssrLightingBuffer);
+                        copyPass.useCustomScaleBias = false;
+
+                        copyPass.output = builder.WriteTexture(m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true){ format = GraphicsFormat.R16G16B16A16_SFloat, name = "Reflection Cache" }));
+                        
+
+                        builder.SetRenderFunc(
+                            (PushFullScreenDebugPassData data, RenderGraphContext ctx) =>
+                            {
+                                HDUtils.BlitCameraTexture(ctx.cmd, data.input, data.output);
+                            });
+
+                        lightingBuffers.ReflectionCacheBuffer = copyPass.output;
+                    }
+
+                    //lightingBuffers.ReflectionCacheBuffer = m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true){ format = GraphicsFormat.R16G16B16A16_SFloat, enableRandomWrite = true, name = "Reflection Cache" });
+                    // m_RenderGraph.AddBlitPass(lightingBuffers.ssrLightingBuffer, lightingBuffers.ReflectionCacheBuffer, Vector2.one, Vector2.zero);
+                    //lightingBuffers.ReflectionCacheBuffer = RenderSSR(m_RenderGraph, hdCamera, ref prepassOutput, clearCoatMask, rayCountTexture, historyValidationTexture, m_SkyManager.GetSkyReflection(hdCamera), transparent: false);
+                    // PushFullScreenDebugTexture(m_RenderGraph, lightingBuffers.ReflectionCacheBuffer, GraphicsFormat.R16G16B16A16_SFloat, -1, true);
 
                     if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && GetRayTracingClusterState())
                     {
