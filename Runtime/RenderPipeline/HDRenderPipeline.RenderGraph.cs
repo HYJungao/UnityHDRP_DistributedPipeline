@@ -196,8 +196,67 @@ namespace UnityEngine.Rendering.HighDefinition
                     StartXRSinglePass(m_RenderGraph, hdCamera);
 
                     if (rtReflections)
+                    {
+                        // var RT_Reflection = Shader.GetGlobalTexture("_InjectReflection") as RenderTexture;
+                        // if (RT_Reflection == null)
+                        //     lightingBuffers.ssrLightingBuffer = m_RenderGraph.defaultResources.blackTextureXR;
+                        // else
+                        //     lightingBuffers.ssrLightingBuffer = m_RenderGraph.ImportTexture(RTHandles.Alloc(RT_Reflection));
+                        //using (var builder = m_RenderGraph.AddRenderPass<PushFullScreenDebugPassData>("Inject Reflection", out var copyPass))
+                        //{
+                        //    var RT_Reflection = Shader.GetGlobalTexture("_InjectReflection") as RenderTexture;
+                        //    if (RT_Reflection == null)
+                        //        copyPass.input = builder.ReadTexture(m_RenderGraph.defaultResources.blackTextureXR);
+                        //    else
+                        //        copyPass.input = builder.ReadTexture(m_RenderGraph.ImportTexture(RTHandles.Alloc(RT_Reflection)));
+
+                        //    copyPass.output = builder.WriteTexture(m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true)
+                        //    { format = GraphicsFormat.R16G16B16A16_SFloat, enableRandomWrite = true, name = "Reflection Ray Reflections" }));
+
+                        //    builder.SetRenderFunc(
+                        //        (PushFullScreenDebugPassData data, RenderGraphContext ctx) =>
+                        //        {
+                        //            HDUtils.BlitCameraTexture(ctx.cmd, data.input, data.output);
+                        //        });
+
+                        //    lightingBuffers.ssrLightingBuffer = copyPass.output;
+                        //    PushFullScreenDebugTexture(m_RenderGraph, lightingBuffers.ssrLightingBuffer, FullScreenDebugMode.ScreenSpaceAmbientOcclusion);
+                        //}
                         lightingBuffers.ssrLightingBuffer = RenderSSR(m_RenderGraph, hdCamera, ref prepassOutput, clearCoatMask, rayCountTexture, historyValidationTexture, m_SkyManager.GetSkyReflection(hdCamera), transparent: false);
-                    lightingBuffers.ssgiLightingBuffer = RenderScreenSpaceIndirectDiffuse(hdCamera, prepassOutput, rayCountTexture, historyValidationTexture, gpuLightListOutput.lightList);
+                    }
+                    // lightingBuffers.ssgiLightingBuffer = RenderScreenSpaceIndirectDiffuse(hdCamera, prepassOutput, rayCountTexture, historyValidationTexture, gpuLightListOutput.lightList);
+
+                    // RenderCustomPass(m_RenderGraph, hdCamera, colorBuffer, prepassOutput, customPassCullingResults, cullingResults, CustomPassInjectionPoint.AfterOpaqueAndSky, aovRequest, aovCustomPassBuffers);
+
+                    // using (var builder = m_RenderGraph.AddRenderPass<PushFullScreenDebugPassData>("Inject GI", out var copyPass))
+                    // {
+                    //    var RTGI = Shader.GetGlobalTexture("_InjectGlobalIllumination") as RenderTexture;
+                    //    if (RTGI == null)
+                    //        copyPass.input = builder.ReadTexture(m_RenderGraph.defaultResources.blackTextureXR);
+                    //    else
+                    //        copyPass.input = builder.ReadTexture(m_RenderGraph.ImportTexture(RTHandles.Alloc(RTGI)));
+
+                    //    copyPass.output = builder.WriteTexture(m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true)
+                    //    { format = GraphicsFormat.R16G16B16A16_SFloat, enableRandomWrite = true, name = "Ray Traced Indirect Diffuse" }));
+
+                    //    builder.SetRenderFunc(
+                    //        (PushFullScreenDebugPassData data, RenderGraphContext ctx) =>
+                    //        {
+                    //            HDUtils.BlitCameraTexture(ctx.cmd, data.input, data.output);
+                    //        });
+
+                    //    lightingBuffers.ssgiLightingBuffer = copyPass.output;
+                    //    PushFullScreenDebugTexture(m_RenderGraph, lightingBuffers.ssgiLightingBuffer, FullScreenDebugMode.ScreenSpaceGlobalIllumination);
+                    // }
+
+                    // lightingBuffers.ssgiLightingBuffer = m_RenderGraph.defaultResources.blackTextureXR;
+
+                    var RT_GI = Shader.GetGlobalTexture("_InjectGlobalIllumination") as RenderTexture;
+                    if (RT_GI == null)
+                        lightingBuffers.ssgiLightingBuffer = m_RenderGraph.defaultResources.blackTextureXR;
+                    else
+                        lightingBuffers.ssgiLightingBuffer = m_RenderGraph.ImportTexture(RTHandles.Alloc(RT_GI));
+                    PushFullScreenDebugTexture(m_RenderGraph, lightingBuffers.ssgiLightingBuffer, FullScreenDebugMode.ScreenSpaceGlobalIllumination);
 
                     if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing) && GetRayTracingClusterState())
                     {
@@ -227,7 +286,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     // Send all the geometry graphics buffer to client systems if required (must be done after the pyramid and before the transparent depth pre-pass)
                     SendGeometryGraphicsBuffers(m_RenderGraph, prepassOutput.normalBuffer, prepassOutput.depthPyramidTexture, hdCamera);
 
-                    RenderCustomPass(m_RenderGraph, hdCamera, colorBuffer, prepassOutput, customPassCullingResults, cullingResults, CustomPassInjectionPoint.AfterOpaqueAndSky, aovRequest, aovCustomPassBuffers);
+                    // RenderCustomPass(m_RenderGraph, hdCamera, colorBuffer, prepassOutput, customPassCullingResults, cullingResults, CustomPassInjectionPoint.AfterOpaqueAndSky, aovRequest, aovCustomPassBuffers);
 
                     DoUserAfterOpaqueAndSky(m_RenderGraph, hdCamera, colorBuffer, prepassOutput.resolvedDepthBuffer, prepassOutput.resolvedNormalBuffer, prepassOutput.resolvedMotionVectorsBuffer);
 
