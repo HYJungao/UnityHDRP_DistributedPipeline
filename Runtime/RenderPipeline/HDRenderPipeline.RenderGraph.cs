@@ -200,9 +200,6 @@ namespace UnityEngine.Rendering.HighDefinition
                         lightingBuffers.ssrLightingBuffer = RenderSSR(m_RenderGraph, hdCamera, ref prepassOutput, clearCoatMask, rayCountTexture, historyValidationTexture, m_SkyManager.GetSkyReflection(hdCamera), transparent: false);
                     lightingBuffers.ssgiLightingBuffer = RenderScreenSpaceIndirectDiffuse(hdCamera, prepassOutput, rayCountTexture, historyValidationTexture, gpuLightListOutput.lightList);
 
-                    // new changed
-                    RenderCustomPass(m_RenderGraph, hdCamera, colorBuffer, prepassOutput, customPassCullingResults, cullingResults, CustomPassInjectionPoint.AfterOpaqueAndSky, aovRequest, aovCustomPassBuffers);
-
                     using (var builder = m_RenderGraph.AddRenderPass<PushFullScreenDebugPassData>("Copy Reflection", out var copyPass))
                     {
                         copyPass.mipIndex = -1;
@@ -210,8 +207,8 @@ namespace UnityEngine.Rendering.HighDefinition
                         copyPass.input = builder.ReadTexture(lightingBuffers.ssrLightingBuffer);
                         copyPass.useCustomScaleBias = false;
 
-                        copyPass.output = builder.WriteTexture(m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true){ format = GraphicsFormat.R16G16B16A16_SFloat, name = "Reflection Cache" }));
-                        
+                        copyPass.output = builder.WriteTexture(m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true) { format = GraphicsFormat.R16G16B16A16_SFloat, name = "Reflection Cache" }));
+
 
                         builder.SetRenderFunc(
                             (PushFullScreenDebugPassData data, RenderGraphContext ctx) =>
@@ -221,6 +218,9 @@ namespace UnityEngine.Rendering.HighDefinition
 
                         lightingBuffers.ReflectionCacheBuffer = copyPass.output;
                     }
+
+                    // new changed
+                    RenderCustomPass(m_RenderGraph, hdCamera, colorBuffer, prepassOutput, customPassCullingResults, cullingResults, CustomPassInjectionPoint.AfterOpaqueAndSky, aovRequest, aovCustomPassBuffers);
 
                     //lightingBuffers.ReflectionCacheBuffer = m_RenderGraph.CreateTexture(new TextureDesc(Vector2.one, true, true){ format = GraphicsFormat.R16G16B16A16_SFloat, enableRandomWrite = true, name = "Reflection Cache" });
                     // m_RenderGraph.AddBlitPass(lightingBuffers.ssrLightingBuffer, lightingBuffers.ReflectionCacheBuffer, Vector2.one, Vector2.zero);
