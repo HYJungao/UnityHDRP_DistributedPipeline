@@ -1231,6 +1231,10 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _GPUInlineDebugDrawer_PlotRingBufferEndRead = Shader.PropertyToID("_GPUInlineDebugDrawer_PlotRingBufferEndRead");
 
         public static readonly int _GPUInlineDebugDrawerMousePos = Shader.PropertyToID("_GPUInlineDebugDrawerMousePos");
+
+        public static readonly int _InjectGlobalIllumination = Shader.PropertyToID("_InjectGlobalIllumination");
+        public static readonly int _InjectReflection = Shader.PropertyToID("_InjectReflection");
+        public static readonly int _InjectAmbientOcculusion = Shader.PropertyToID("_InjectAmbientOcculusion");
     }
 
     /// <summary>
